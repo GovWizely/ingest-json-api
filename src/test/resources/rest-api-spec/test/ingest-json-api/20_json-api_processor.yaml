@@ -1,0 +1,39 @@
+---
+"Test json-api processor with defaults":
+  - do:
+      ingest.put_pipeline:
+        id: "my_pipeline"
+        body:  >
+          {
+            "description": "_description",
+            "processors": [
+              {
+                "json_api" : {
+                  "field": "ip",
+                  "target_field": "country",
+                  "json_path": "country_name",
+                  "ignore_missing": true,
+                  "multi_value": false,
+                  "url_prefix" : "http://freegeoip.net/json/{}"
+                }
+              }
+            ]
+          }
+  - match: { acknowledged: true }
+
+  - do:
+      index:
+        index: test
+        type: test
+        id: 1
+        pipeline: "my_pipeline"
+        body: {ip: "216.102.95.101"}
+
+  - do:
+      get:
+        index: test
+        type: test
+        id: 1
+  - match: { _source.ip: "216.102.95.101" }
+  - match: { _source.country: "United States" }
+
