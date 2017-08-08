@@ -17,7 +17,11 @@
 
 package org.elasticsearch.plugin.ingest.jsonapi;
 
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.common.cache.Cache;
+import org.elasticsearch.common.cache.CacheBuilder;
 import org.elasticsearch.common.collect.MapBuilder;
+import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.ingest.Processor;
 import org.elasticsearch.plugins.IngestPlugin;
@@ -28,19 +32,22 @@ import java.util.List;
 import java.util.Map;
 
 public class IngestJsonApiPlugin extends Plugin implements IngestPlugin {
-
-    private static final Setting<String> YOUR_SETTING =
-            new Setting<>("ingest.json-api.setting", "foo", (value) -> value, Setting.Property.NodeScope);
+    private final Setting<Long> CACHE_SIZE_SETTING = Setting.longSetting("ingest.json-api.cache_size", 1000, 0,
+            Setting.Property.NodeScope);
 
     @Override
     public List<Setting<?>> getSettings() {
-        return Collections.singletonList(YOUR_SETTING);
+        return Collections.singletonList(CACHE_SIZE_SETTING);
     }
 
     @Override
     public Map<String, Processor.Factory> getProcessors(Processor.Parameters parameters) {
+        long cacheSize = CACHE_SIZE_SETTING.get(parameters.env.settings());
+        Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(cacheSize).build();
+        Logger logger = Loggers.getLogger(IngestJsonApiPlugin.class);
+        logger.info("Created cache with size " + cacheSize);
         return MapBuilder.<String, Processor.Factory>newMapBuilder()
-                .put(JsonApiProcessor.TYPE, new JsonApiProcessor.Factory())
+                .put(JsonApiProcessor.TYPE, new JsonApiProcessor.Factory(cache))
                 .immutableMap();
     }
 

@@ -35,6 +35,12 @@ GET /my-index/my-type/1
 }
 ```
 
+## Configuration
+
+| Parameter | Use |
+| --- | --- |
+| ingest.json-api.cache_size   | Configure the in-memory on-heap cache size. This cache is backed by `org.elasticsearch.common.cache.Cache` and is shared by all ingest pipelines using this plugin on a given elasticsearch node. (Default: 1000)  |
+
 ## Setup
 
 In order to install this plugin, you need to create a zip distribution first by running

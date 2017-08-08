@@ -28,6 +28,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.common.cache.Cache;
 import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.ingest.AbstractProcessor;
 import org.elasticsearch.ingest.IngestDocument;
@@ -35,6 +36,7 @@ import org.elasticsearch.ingest.Processor;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -51,13 +53,15 @@ public final class JsonApiProcessor extends AbstractProcessor {
     private final String extraHeader;
     private final String jsonPath;
     private final boolean multiValue;
+    private final Cache<String, String> cache;
 
     private final Logger logger;
 
     private final boolean ignoreMissing;
 
     JsonApiProcessor(String tag, String field, String targetField, String urlPrefix, String extraHeader,
-                     boolean ignoreMissing, String jsonPath, boolean multiValue) throws IOException {
+                     boolean ignoreMissing, String jsonPath, boolean multiValue, Cache<String, String> cache)
+            throws IOException {
         super(tag);
         this.field = field;
         this.urlPrefix = urlPrefix;
@@ -66,6 +70,7 @@ public final class JsonApiProcessor extends AbstractProcessor {
         this.extraHeader = extraHeader;
         this.jsonPath = jsonPath;
         this.multiValue = multiValue;
+        this.cache = cache;
         this.logger = Loggers.getLogger(IngestJsonApiPlugin.class);
     }
 
@@ -85,15 +90,23 @@ public final class JsonApiProcessor extends AbstractProcessor {
         String url = urlPrefix.replace("{}", URLEncoder.encode(fieldValue, "UTF-8"));
         logger.debug("url: " + url);
 
+        String responseBody = cache.get(url);
+        if (responseBody == null) {
+            responseBody = fetchFromUrl(url);
+        }
+        Configuration conf = Configuration.defaultConfiguration().addOptions(Option.ALWAYS_RETURN_LIST);
+        List<Object> valueAtPath = JsonPath.using(conf).parse(responseBody).read(jsonPath);
+        ingestDocument.setFieldValue(targetField, multiValue ? valueAtPath : valueAtPath.get(0));
+    }
+
+    private String fetchFromUrl(String url) throws IOException {
+        String responseBody;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet httpGet = new HttpGet(url);
 
-            // TODO: remove or simplify
-            if (extraHeader != null) {
-                if (extraHeader.indexOf(":") > 0) {
-                    httpGet.addHeader(extraHeader.substring(0, extraHeader.indexOf(":")).trim(),
-                            extraHeader.substring(extraHeader.indexOf(":") + 1).trim());
-                }
+            if (extraHeader != null && extraHeader.contains(":")) {
+                String[] httpHeader = Arrays.stream(extraHeader.split(":")).map(String::trim).toArray(String[]::new);
+                httpGet.addHeader(httpHeader[0], httpHeader[1]);
             }
 
             ResponseHandler<String> responseHandler = response -> {
@@ -106,13 +119,11 @@ public final class JsonApiProcessor extends AbstractProcessor {
                 }
             };
 
-            String responseBody = httpClient.execute(httpGet, responseHandler);
+            responseBody = httpClient.execute(httpGet, responseHandler);
+            cache.put(url, responseBody);
             logger.debug("responseBody: " + responseBody);
-            Configuration conf = Configuration.defaultConfiguration().addOptions(Option.ALWAYS_RETURN_LIST);
-            List<Object> valueAtPath = JsonPath.using(conf).parse(responseBody).read(jsonPath);
-
-            ingestDocument.setFieldValue(targetField, multiValue ? valueAtPath : valueAtPath.get(0));
         }
+        return responseBody;
     }
 
     @Override
@@ -121,6 +132,12 @@ public final class JsonApiProcessor extends AbstractProcessor {
     }
 
     public static final class Factory implements Processor.Factory {
+
+        private final Cache<String, String> cache;
+
+        Factory(Cache<String, String> cache) {
+            this.cache = cache;
+        }
 
         @Override
         public JsonApiProcessor create(Map<String, Processor.Factory> registry, String processorTag,
@@ -134,7 +151,7 @@ public final class JsonApiProcessor extends AbstractProcessor {
             boolean multiValue = readBooleanProperty(TYPE, processorTag, config, "multi_value", false);
 
             return new JsonApiProcessor(processorTag, field, targetField, urlPrefix, extraHeader, ignoreMissing,
-                    jsonPath, multiValue);
+                    jsonPath, multiValue, cache);
         }
     }
 
