@@ -87,7 +87,9 @@ public final class JsonApiProcessor extends AbstractProcessor {
             }
         }
 
-        String url = urlPrefix.replace("{}", URLEncoder.encode(fieldValue, "UTF-8"));
+        String encoded = URLEncoder.encode(fieldValue, "UTF-8").replaceAll("\\+", "%20");
+        logger.debug("Encoded fieldValue '" + fieldValue + "' as '" + encoded + "'");
+        String url = urlPrefix.replace("{}", encoded);
         logger.debug("url: " + url);
 
         String responseBody = cache.get(url);

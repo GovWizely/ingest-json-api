@@ -138,5 +138,20 @@ public class JsonApiProcessorTests extends ESTestCase {
         thrown.expectMessage("Unexpected response status: 404");
         processor.execute(ingestDocument);
     }
+
+    public void testUrlEncodingOfSpaces() throws Exception {
+        Map<String, Object> document = new HashMap<>();
+        document.put("country_name", "United States");
+        IngestDocument ingestDocument = RandomDocumentPicks.randomIngestDocument(random(), document);
+        Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
+
+        JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "country_name", "country",
+                "https://restcountries.eu/rest/v1/name/{}?fullText=true", null, true, "$..alpha2Code", false, cache);
+        processor.execute(ingestDocument);
+        Map<String, Object> data = ingestDocument.getSourceAndMetadata();
+
+        assertThat(data, hasKey("country"));
+        assertThat(data.get("country"), is("US"));
+    }
 }
 
