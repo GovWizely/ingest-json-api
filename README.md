@@ -46,7 +46,7 @@ GET /my-index/my-type/1
 In order to install this plugin, you need to create a zip distribution first by running
 
 ```bash
-gradle clean check
+./gradlew clean check
 ```
 
 This will run tests and produce a zip file in `build/distributions`.
@@ -57,11 +57,16 @@ After building the zip file, you can install it like this:
 bin/plugin install file:///path/to/ingest-json-api/build/distribution/ingest-json-api-0.0.1-SNAPSHOT.zip
 ```
 
+## Upgrading base tech
+
+Elasticsearch plugins must be compiled against a specific version of Elasticsearch. To bump the version of Elasticsearch
+that this plugin supports, change the version number in `build.gradle` under `buildscript.dependencies.classpath`.
+
 ## Contributing
 
 Make sure you have a modern Gradle installed, as the plugin uses it as its build system.
 
-IntelliJ users can automatically configure their IDE: `gradle idea` then `File->New Project From Existing Sources`. Point to the root of the source directory, select `Import project from external model->Gradle`, enable `Use auto-import`. Additionally, in order to run tests directly from IDEA 2017.1 and above it is required to disable the IDEA run launcher, which can be achieved by adding `-Didea.no.launcher=true` [JVM option](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties) and restarting IntelliJ. You may also need to remove some JARs from the default classpath (e.g., `ant-javafx.jar`) in order to fix Jar hell errors. To do so, edit `Project Structure...->SDK->Classpath`.
+IntelliJ users can automatically configure their IDE: `./gradlew idea` then `File->New Project From Existing Sources`. Point to the root of the source directory, select `Import project from external model->Gradle`, enable `Use auto-import`. Additionally, in order to run tests directly from IDEA 2017.1 and above it is required to disable the IDEA run launcher, which can be achieved by adding `-Didea.no.launcher=true` [JVM option](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties) and restarting IntelliJ. You may also need to remove some JARs from the default classpath (e.g., `ant-javafx.jar`) in order to fix Jar hell errors. To do so, edit `Project Structure...->SDK->Classpath`.
 
 
 ## Credits
