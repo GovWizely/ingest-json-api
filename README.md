@@ -54,7 +54,7 @@ This will run tests and produce a zip file in `build/distributions`.
 After building the zip file, you can install it like this:
 
 ```bash
-bin/plugin install file:///path/to/ingest-json-api/build/distribution/ingest-json-api-0.0.1-SNAPSHOT.zip
+bin/plugin install file:///path/to/ingest-json-api/build/distribution/ingest-json-api-0.0.2.zip
 ```
 
 ## Upgrading base tech
