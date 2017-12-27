@@ -11,10 +11,10 @@
                 "json_api" : {
                   "field": "ip",
                   "target_field": "country",
-                  "json_path": "country_name",
+                  "json_path": "country",
                   "ignore_missing": true,
                   "multi_value": false,
-                  "url_prefix" : "http://freegeoip.net/json/{}"
+                  "url_prefix" : "http://ip-api.com/json/{}"
                 }
               }
             ]

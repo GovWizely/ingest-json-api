@@ -28,6 +28,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.cache.Cache;
 import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.ingest.AbstractProcessor;
@@ -36,6 +37,9 @@ import org.elasticsearch.ingest.Processor;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -120,8 +124,19 @@ public final class JsonApiProcessor extends AbstractProcessor {
                     throw new ClientProtocolException("Unexpected response status: " + status);
                 }
             };
-
-            responseBody = httpClient.execute(httpGet, responseHandler);
+            SecurityManager sm = System.getSecurityManager();
+            if (sm != null) {
+                sm.checkPermission(new SpecialPermission());
+            }
+            try {
+                responseBody = AccessController.doPrivileged(
+                        (PrivilegedExceptionAction<String>) () -> httpClient.execute(httpGet, responseHandler)
+                );
+            } catch (PrivilegedActionException e) {
+                // e.getException() should be an instance of IOException, as only "checked" exceptions will be
+                // "wrapped" in a PrivilegedActionException.
+                throw (IOException) e.getException();
+            }
             cache.put(url, responseBody);
             logger.debug("responseBody: " + responseBody);
         }
