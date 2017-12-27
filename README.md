@@ -29,6 +29,8 @@ PUT /my-index/my-type/1?pipeline=json-api-pipeline
 }
 
 GET /my-index/my-type/1
+
+# result
 {
   "ip" : "216.102.95.101",
   "country": "United States"
@@ -43,7 +45,8 @@ GET /my-index/my-type/1
 
 ## Setup
 
-In order to install this plugin, you need to create a zip distribution first by running
+In order to install this plugin, you need to create a zip distribution first. Update the `version` field in
+ `build.gradle` and then run
 
 ```bash
 ./gradlew clean check
@@ -54,7 +57,7 @@ This will run tests and produce a zip file in `build/distributions`.
 After building the zip file, you can install it like this:
 
 ```bash
-bin/plugin install file:///path/to/ingest-json-api/build/distribution/ingest-json-api-0.0.2.zip
+bin/elasticsearch-plugin install file:///path/to/ingest-json-api/build/distributions/ingest-json-api-0.0.3.zip
 ```
 
 ## Upgrading base tech
