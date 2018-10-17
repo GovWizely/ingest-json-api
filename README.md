@@ -1,6 +1,6 @@
 # Elasticsearch json-api Ingest Processor
 
-Fetches data from an external JSON API and extracts a subset into a target field
+This [Elasticsearch](https://www.elastic.co/products/elasticsearch) [ingest plugin](https://www.elastic.co/guide/en/elasticsearch/plugins/6.4/ingest.html) fetches data from an external JSON API and extracts a subset into a target field.
 
 ## Usage
 
@@ -14,10 +14,10 @@ PUT _ingest/pipeline/json-api-pipeline
       "json_api" : {
         "field": "ip",
         "target_field": "country",
-        "json_path": "country_name",
+        "json_path": "country",
         "ignore_missing": true,
         "multi_value": false,
-        "url_prefix" : "http://freegeoip.net/json/{}"
+        "url_prefix" : "http://ip-api.com/json/{}"
       }
     }
   ]
@@ -29,6 +29,8 @@ PUT /my-index/my-type/1?pipeline=json-api-pipeline
 }
 
 GET /my-index/my-type/1
+
+# result
 {
   "ip" : "216.102.95.101",
   "country": "United States"
@@ -41,9 +43,15 @@ GET /my-index/my-type/1
 | --- | --- |
 | ingest.json-api.cache_size   | Configure the in-memory on-heap cache size. This cache is backed by `org.elasticsearch.common.cache.Cache` and is shared by all ingest pipelines using this plugin on a given elasticsearch node. (Default: 1000)  |
 
+## Prerequisites
+
+* Java 10 SDK with `JAVA_HOME` pointing at it. e.g., `JAVA_HOME=/Users/you/Downloads/jdk-10.0.2.jdk/Contents/Home`
+* Gradle 4.10+ (can be installed on Mac with `brew install gradle`)
+
 ## Setup
 
-In order to install this plugin, you need to create a zip distribution first by running
+In order to install this plugin, you need to create a zip distribution first. Update the `version` field in
+ `build.gradle` and then run
 
 ```bash
 ./gradlew clean check
@@ -54,7 +62,7 @@ This will run tests and produce a zip file in `build/distributions`.
 After building the zip file, you can install it like this:
 
 ```bash
-bin/plugin install file:///path/to/ingest-json-api/build/distribution/ingest-json-api-0.0.2.zip
+bin/elasticsearch-plugin install file:///path/to/ingest-json-api/build/distributions/ingest-json-api-6.4.2.zip
 ```
 
 ## Upgrading base tech

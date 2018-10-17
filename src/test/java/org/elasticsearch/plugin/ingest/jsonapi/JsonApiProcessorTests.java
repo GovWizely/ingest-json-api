@@ -47,7 +47,7 @@ public class JsonApiProcessorTests extends ESTestCase {
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
-                "http://freegeoip.net/json/{}", null, true, "country_name", false, cache);
+                "http://ip-api.com/json/{}", null, true, "country", false, cache);
         processor.execute(ingestDocument);
         Map<String, Object> data = ingestDocument.getSourceAndMetadata();
 
@@ -62,7 +62,7 @@ public class JsonApiProcessorTests extends ESTestCase {
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "foo", "foo",
-                "http://freegeoip.net/json/{}", null, true, "country_name", false, cache);
+                "http://ip-api.com/json/{}", null, true, "country", false, cache);
         processor.execute(ingestDocument);
         Map<String, Object> data = ingestDocument.getSourceAndMetadata();
 
@@ -77,8 +77,8 @@ public class JsonApiProcessorTests extends ESTestCase {
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
-                "http://freegeoip.net/json/{}", "Authorization: Basic ABC123==",
-                true, "country_name", false, cache);
+                "http://ip-api.com/json/{}", "Authorization: Basic ABC123==",
+                true, "country", false, cache);
         processor.execute(ingestDocument);
         Map<String, Object> data = ingestDocument.getSourceAndMetadata();
 
@@ -93,7 +93,7 @@ public class JsonApiProcessorTests extends ESTestCase {
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
-                "http://freegeoip.net/json/{}", null, true, "country_name", true, cache);
+                "http://ip-api.com/json/{}", null, true, "country", true, cache);
         processor.execute(ingestDocument);
         Map<String, Object> data = ingestDocument.getSourceAndMetadata();
 
@@ -107,7 +107,7 @@ public class JsonApiProcessorTests extends ESTestCase {
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
-                "http://freegeoip.net/json/{}", null, true, "country_name", false, cache);
+                "http://ip-api.com/json/{}", null, true, "country", false, cache);
         processor.execute(ingestDocument);
         Map<String, Object> data = ingestDocument.getSourceAndMetadata();
 
@@ -120,7 +120,7 @@ public class JsonApiProcessorTests extends ESTestCase {
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
-                "http://freegeoip.net/json/{}", null, false, "country_name", false, cache);
+                "http://ip-api.com/json/{}", null, false, "country", false, cache);
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("field [ip] not present as part of path [ip]");
         processor.execute(ingestDocument);
@@ -128,12 +128,12 @@ public class JsonApiProcessorTests extends ESTestCase {
 
     public void testResponseHandler() throws Exception {
         Map<String, Object> document = new HashMap<>();
-        document.put("ip", "216.102.95.101");
+        document.put("country", "Elbonia");
         IngestDocument ingestDocument = RandomDocumentPicks.randomIngestDocument(random(), document);
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
-        JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
-                "http://freegeoip.net/nope/{}", null, true, "country_name", false, cache);
+        JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "country", "country",
+                "http://restcountries.eu/rest/v1/name/{}", null, true, "$..alpha2Code", false, cache);
         thrown.expect(ClientProtocolException.class);
         thrown.expectMessage("Unexpected response status: 404");
         processor.execute(ingestDocument);
@@ -141,11 +141,11 @@ public class JsonApiProcessorTests extends ESTestCase {
 
     public void testUrlEncodingOfSpaces() throws Exception {
         Map<String, Object> document = new HashMap<>();
-        document.put("country_name", "United States");
+        document.put("country", "United States");
         IngestDocument ingestDocument = RandomDocumentPicks.randomIngestDocument(random(), document);
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(TEST_CACHE_SIZE).build();
 
-        JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "country_name", "country",
+        JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "country", "country",
                 "https://restcountries.eu/rest/v1/name/{}?fullText=true", null, true, "$..alpha2Code", false, cache);
         processor.execute(ingestDocument);
         Map<String, Object> data = ingestDocument.getSourceAndMetadata();
