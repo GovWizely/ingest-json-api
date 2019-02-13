@@ -75,17 +75,17 @@ public final class JsonApiProcessor extends AbstractProcessor {
         this.jsonPath = jsonPath;
         this.multiValue = multiValue;
         this.cache = cache;
-        this.logger = Loggers.getLogger(IngestJsonApiPlugin.class);
+        this.logger = Loggers.getLogger(IngestJsonApiPlugin.class, "IngestJsonApi");
     }
 
 
     @Override
-    public void execute(IngestDocument ingestDocument) throws java.io.IOException {
+    public IngestDocument execute(IngestDocument ingestDocument) throws Exception {
 
         String fieldValue = ingestDocument.getFieldValue(field, String.class, ignoreMissing);
         if (fieldValue == null) {
             if (ignoreMissing) {
-                return;
+                return ingestDocument;
             } else {
                 throw new IllegalArgumentException("field [" + field + "] is null, cannot extract URL.");
             }
@@ -103,6 +103,7 @@ public final class JsonApiProcessor extends AbstractProcessor {
         Configuration conf = Configuration.defaultConfiguration().addOptions(Option.ALWAYS_RETURN_LIST);
         List<Object> valueAtPath = JsonPath.using(conf).parse(responseBody).read(jsonPath);
         ingestDocument.setFieldValue(targetField, multiValue ? valueAtPath : valueAtPath.get(0));
+        return ingestDocument;
     }
 
     private String fetchFromUrl(String url) throws IOException {
