@@ -45,8 +45,8 @@ GET /my-index/my-type/1
 
 ## Prerequisites
 
-* Java 10 SDK with `JAVA_HOME` pointing at it. e.g., `JAVA_HOME=/Users/you/Downloads/jdk-10.0.2.jdk/Contents/Home`
-* Gradle 4.10+ (can be installed on Mac with `brew install gradle`)
+* Java 11 SDK with `JAVA_HOME` pointing at it. e.g., `JAVA_HOME=/Users/you/Downloads/openjdk-11.0.2.jdk/Contents/Home`
+* Gradle 5.2+ (can be installed on Mac with `brew install gradle`)
 
 ## Setup
 
@@ -62,13 +62,13 @@ This will run tests and produce a zip file in `build/distributions`.
 After building the zip file, you can install it like this:
 
 ```bash
-bin/elasticsearch-plugin install file:///path/to/ingest-json-api/build/distributions/ingest-json-api-6.4.2.zip
+bin/elasticsearch-plugin install file:///path/to/ingest-json-api/build/distributions/ingest-json-api-6.6.0.zip
 ```
 
 ## Upgrading base tech
 
 Elasticsearch plugins must be compiled against a specific version of Elasticsearch. To bump the version of Elasticsearch
-that this plugin supports, change the version number in `build.gradle` under `buildscript.dependencies.classpath`.
+that this plugin supports, change the version number in `build.gradle` under `buildscript.dependencies.classpath` and `version`.
 
 ## Contributing
 

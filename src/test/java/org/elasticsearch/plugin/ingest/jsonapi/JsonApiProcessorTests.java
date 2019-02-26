@@ -48,8 +48,7 @@ public class JsonApiProcessorTests extends ESTestCase {
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
                 "http://ip-api.com/json/{}", null, true, "country", false, cache);
-        processor.execute(ingestDocument);
-        Map<String, Object> data = ingestDocument.getSourceAndMetadata();
+        Map<String, Object> data = processor.execute(ingestDocument).getSourceAndMetadata();
 
         assertThat(data, hasKey("country"));
         assertThat(data.get("country"), is("United States"));
@@ -63,8 +62,7 @@ public class JsonApiProcessorTests extends ESTestCase {
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "foo", "foo",
                 "http://ip-api.com/json/{}", null, true, "country", false, cache);
-        processor.execute(ingestDocument);
-        Map<String, Object> data = ingestDocument.getSourceAndMetadata();
+        Map<String, Object> data = processor.execute(ingestDocument).getSourceAndMetadata();
 
         assertThat(data, hasKey("foo"));
         assertThat(data.get("foo"), is("United States"));
@@ -79,8 +77,7 @@ public class JsonApiProcessorTests extends ESTestCase {
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
                 "http://ip-api.com/json/{}", "Authorization: Basic ABC123==",
                 true, "country", false, cache);
-        processor.execute(ingestDocument);
-        Map<String, Object> data = ingestDocument.getSourceAndMetadata();
+        Map<String, Object> data = processor.execute(ingestDocument).getSourceAndMetadata();
 
         assertThat(data, hasKey("country"));
         assertThat(data.get("country"), is("United States"));
@@ -94,8 +91,7 @@ public class JsonApiProcessorTests extends ESTestCase {
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
                 "http://ip-api.com/json/{}", null, true, "country", true, cache);
-        processor.execute(ingestDocument);
-        Map<String, Object> data = ingestDocument.getSourceAndMetadata();
+        Map<String, Object> data = processor.execute(ingestDocument).getSourceAndMetadata();
 
         assertThat(data, hasKey("country"));
         assertThat(data.get("country"), is(Collections.singletonList("United States")));
@@ -108,8 +104,7 @@ public class JsonApiProcessorTests extends ESTestCase {
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "ip", "country",
                 "http://ip-api.com/json/{}", null, true, "country", false, cache);
-        processor.execute(ingestDocument);
-        Map<String, Object> data = ingestDocument.getSourceAndMetadata();
+        Map<String, Object> data = processor.execute(ingestDocument).getSourceAndMetadata();
 
         assertThat(data, not(hasKey("country")));
     }
@@ -147,8 +142,7 @@ public class JsonApiProcessorTests extends ESTestCase {
 
         JsonApiProcessor processor = new JsonApiProcessor(randomAlphaOfLength(10), "country", "country",
                 "https://restcountries.eu/rest/v1/name/{}?fullText=true", null, true, "$..alpha2Code", false, cache);
-        processor.execute(ingestDocument);
-        Map<String, Object> data = ingestDocument.getSourceAndMetadata();
+        Map<String, Object> data = processor.execute(ingestDocument).getSourceAndMetadata();
 
         assertThat(data, hasKey("country"));
         assertThat(data.get("country"), is("US"));

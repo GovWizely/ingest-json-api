@@ -44,7 +44,7 @@ public class IngestJsonApiPlugin extends Plugin implements IngestPlugin {
     public Map<String, Processor.Factory> getProcessors(Processor.Parameters parameters) {
         long cacheSize = CACHE_SIZE_SETTING.get(parameters.env.settings());
         Cache<String, String> cache = CacheBuilder.<String, String>builder().setMaximumWeight(cacheSize).build();
-        Logger logger = Loggers.getLogger(IngestJsonApiPlugin.class);
+        Logger logger = Loggers.getLogger(IngestJsonApiPlugin.class, "IngestJsonApi");
         logger.info("Created cache with size " + cacheSize);
         return MapBuilder.<String, Processor.Factory>newMapBuilder()
                 .put(JsonApiProcessor.TYPE, new JsonApiProcessor.Factory(cache))
